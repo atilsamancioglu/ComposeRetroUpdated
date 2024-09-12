@@ -21,6 +21,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.Layout
@@ -42,7 +43,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-    enableEdgeToEdge()
+        enableEdgeToEdge()
         setContent {
             ComposeRetroTheme {
                 MainScreen()
@@ -53,7 +54,7 @@ class MainActivity : ComponentActivity() {
 
     @Composable
     fun MainScreen() {
-        var cryptoModels = remember { mutableStateListOf<CryptoModel>() }
+        //var cryptoModels = remember { mutableStateListOf<CryptoModel>() }
 
         val retrofit = Retrofit.Builder()
             .baseUrl(BASE_URL)
@@ -61,6 +62,7 @@ class MainActivity : ComponentActivity() {
             .build()
             .create(CryptoAPI::class.java)
 
+        /*
         val call = retrofit.getData()
 
         call.enqueue(object: Callback<List<CryptoModel>> {
@@ -79,13 +81,19 @@ class MainActivity : ComponentActivity() {
             }
         })
 
+         */
+        val cryptoList = produceState<List<CryptoModel>>(initialValue = listOf()) {
+            value = retrofit.getData()
+        }.value
+
+
         //CryptoList(cryptos = cryptoModels) this will be displayed without a top app bar
 
         Scaffold(topBar = { AppBar() }) { paddingValues ->
             Surface(modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)) {
-            CryptoList(cryptos = cryptoModels)
+            CryptoList(cryptos = cryptoList)
 
             }
         }
